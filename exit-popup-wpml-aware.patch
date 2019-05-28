@@ -1,5 +1,5 @@
 From d1379083b8682d7e526b1d987c75a40a2a427434 Mon Sep 17 00:00:00 2001
-From: David THOMAS <anou@smol.org>
+From: David THOMAS <anou(at)smol(dot)org>
 Date: Tue, 28 May 2019 11:10:30 +0200
 Subject: [PATCH] :electric_plug: Patch exit-popup plugin to be WPML aware
 
@@ -7,10 +7,10 @@ Subject: [PATCH] :electric_plug: Patch exit-popup plugin to be WPML aware
  .../plugins/exit-popup/exit-popup.php         | 32 +++++++++++++++++--
  1 file changed, 29 insertions(+), 3 deletions(-)
 
-diff --git a/app/wp-content/plugins/exit-popup/exit-popup.php b/app/wp-content/plugins/exit-popup/exit-popup.php
+diff --git a/wp-content/plugins/exit-popup/exit-popup.php b/wp-content/plugins/exit-popup/exit-popup.php
 index 25927588..f9c53d44 100644
---- a/app/wp-content/plugins/exit-popup/exit-popup.php
-+++ b/app/wp-content/plugins/exit-popup/exit-popup.php
+--- a/wp-content/plugins/exit-popup/exit-popup.php
++++ b/wp-content/plugins/exit-popup/exit-popup.php
 @@ -103,6 +103,18 @@ function exit_popup_settings_page() { ?>
  				</small>
  			</td>
@@ -48,11 +48,11 @@ index 25927588..f9c53d44 100644
  register_deactivation_hook( __FILE__, 'exit_popup_deactivation' );
 @@ -153,9 +167,21 @@ function exit_popup_dependencies() {
  add_action( 'wp_enqueue_scripts', 'exit_popup_dependencies' );
- 
+
  function exit_popup() {
--	
+-
 -	if(!isset($_COOKIE['viewedExitPopupWP']) && $_COOKIE['viewedExitPopupWP'] != 'true') {
--		
+-
 +
 +  // Check for language
 +  $check_lg = true;
@@ -71,6 +71,5 @@ index 25927588..f9c53d44 100644
  	if(esc_attr( get_option('exit_popup_click_outside') ) == "true") {
  		$exit_popup_click_outside = "";
  	} else {
--- 
+--
 2.19.2
-
