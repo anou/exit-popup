@@ -1,0 +1,76 @@
+From d1379083b8682d7e526b1d987c75a40a2a427434 Mon Sep 17 00:00:00 2001
+From: David THOMAS <anou@smol.org>
+Date: Tue, 28 May 2019 11:10:30 +0200
+Subject: [PATCH] :electric_plug: Patch exit-popup plugin to be WPML aware
+
+---
+ .../plugins/exit-popup/exit-popup.php         | 32 +++++++++++++++++--
+ 1 file changed, 29 insertions(+), 3 deletions(-)
+
+diff --git a/app/wp-content/plugins/exit-popup/exit-popup.php b/app/wp-content/plugins/exit-popup/exit-popup.php
+index 25927588..f9c53d44 100644
+--- a/app/wp-content/plugins/exit-popup/exit-popup.php
++++ b/app/wp-content/plugins/exit-popup/exit-popup.php
+@@ -103,6 +103,18 @@ function exit_popup_settings_page() { ?>
+ 				</small>
+ 			</td>
+ 		</tr>
++    <?php if( array_key_exists( 'wpml_object_id' , $GLOBALS['wp_filter']) ): // check for WPML ?>
++      <tr valign="top">
++        <th scope="row"><?php _e('Enabled language','exitpp');?></th>
++        <td>
++          <?php $languages = apply_filters( 'wpml_active_languages', NULL, 'orderby=id&order=desc' );
++                $enabled_languages = get_option('exit_popup_languages');
++          foreach ($languages as $key => $value) : ?>
++            <label style="padding-right: 15px;"><input type="checkbox" name="exit_popup_languages[<?php echo $key;?>]" value="<?php echo $key; ?>" <?php checked( $key, $enabled_languages[$key], true); ?> />&nbsp;<?php echo $value['native_name']; ?></label>
++          <?php endforeach; ?>
++        </td>
++      </tr>
++    <?php endif; ?>
+ 		<tr valign="top">
+ 			<th scope="row"><label for="exit_popup_powered_by">Show 'Powered by' Link</label></th>
+ 			<td>
+@@ -127,6 +139,7 @@ function exit_popup_settings() {
+ 	register_setting( 'exit-popup-settings', 'exit_popup_popup_title' );
+ 	register_setting( 'exit-popup-settings', 'exit_popup_popup_body' );
+ 	register_setting( 'exit-popup-settings', 'exit_popup_popup_footer' );
++  register_setting( 'exit-popup-settings', 'exit_popup_languages' );
+ 	register_setting( 'exit-popup-settings', 'exit_popup_powered_by' );
+ }
+ add_action( 'admin_init', 'exit_popup_settings' );
+@@ -140,6 +153,7 @@ function exit_popup_deactivation() {
+     delete_option( 'exit_popup_popup_title' );
+     delete_option( 'exit_popup_popup_body' );
+     delete_option( 'exit_popup_popup_footer' );
++    delete_option( 'exit_popup_languages' );
+     delete_option( 'exit_popup_powered_by' );
+ }
+ register_deactivation_hook( __FILE__, 'exit_popup_deactivation' );
+@@ -153,9 +167,21 @@ function exit_popup_dependencies() {
+ add_action( 'wp_enqueue_scripts', 'exit_popup_dependencies' );
+ 
+ function exit_popup() {
+-	
+-	if(!isset($_COOKIE['viewedExitPopupWP']) && $_COOKIE['viewedExitPopupWP'] != 'true') {
+-		
++
++  // Check for language
++  $check_lg = true;
++  if( array_key_exists( 'wpml_object_id' , $GLOBALS['wp_filter']) ) {
++    $epp_lg = get_option('exit_popup_languages');
++    $current_lg = ICL_LANGUAGE_CODE;
++
++    $check_lg = false;
++
++    if( in_array($current_lg, $epp_lg) ) $check_lg = true;
++
++  }
++
++  if($check_lg && !isset($_COOKIE['viewedExitPopupWP']) && $_COOKIE['viewedExitPopupWP'] != 'true') {
++
+ 	if(esc_attr( get_option('exit_popup_click_outside') ) == "true") {
+ 		$exit_popup_click_outside = "";
+ 	} else {
+-- 
+2.19.2
+
